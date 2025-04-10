@@ -1,0 +1,161 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>മറവി</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/dashboard.css') }}">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>Hello, {{ session.get('username', 'User') }}</h1>
+        </header>
+
+        <section class="analysis-card">
+            <h2>Analysis</h2>
+            <div class="chart-container">
+                <canvas id="analysisChart"></canvas>
+            </div>
+        </section>
+
+        <div class="activities-grid">
+            <a href="{{ url_for('next_task', task_number=0) }}" class="activity-card">
+                <h3>Handwriting Test</h3>
+                <p>Challenge Your Brain and Hand Coordination with Writing Tasks</p>
+            </a>
+        </div>
+        <div class="actgrid">
+            <a href="{{ url_for('memory_matrix') }}" class="activity-card">
+                <h3>Memory Matrix</h3>
+                <p>Test your working memory with visual patterns</p>
+            </a>
+            <a href="{{ url_for('stroop_test') }}" class="activity-card">
+                <h3>Stroop Test</h3>
+                <p>Measure your cognitive flexibility and attention</p>
+            </a>
+        </div>
+
+        <section class="about-section">
+            <div class="section-header">
+                <h2>About Us</h2>
+                <a href="{{ url_for('about') }}" class="see-all">Learn More</a>
+            </div>
+            <div class="about-content">
+                <p>We are dedicated to providing innovative solutions for early detection and monitoring of cognitive health through advanced handwriting analysis.</p>
+                <div class="about-features">
+                    <div class="feature">
+                        <h3>Our Technology</h3>
+                        <p>State-of-the-art machine learning algorithms for cognitive health monitoring</p>
+                    </div>
+                    <div class="feature">
+                        <h3>Our Mission</h3>
+                        <p>Making cognitive health assessment accessible and effective</p>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <nav class="nav-bar">
+            <a href="{{ url_for('dashboard') }}" class="nav-item active">
+                <span class="nav-icon">🏠</span>
+                <span class="nav-label">Home</span>
+            </a>
+            <a href="{{ url_for('about') }}" class="nav-item">
+                <span class="nav-icon">ℹ️</span>
+                <span class="nav-label">About</span>
+            </a>
+            <a href="#" class="nav-item" onclick="showLogoutConfirmation(event)">
+                <span class="nav-icon">👤</span>
+                <span class="nav-label">Profile</span>
+            </a>
+        </nav>
+
+        <!-- Logout Confirmation Dialog -->
+        <div id="logoutDialog" class="dialog-overlay">
+            <div class="dialog-content">
+                <h3>Logout Confirmation</h3>
+                <p>Do you want to log out?</p>
+                <div class="dialog-buttons">
+                    <button onclick="logout()" class="confirm-button">Yes, Logout</button>
+                    <button onclick="hideLogoutConfirmation()" class="cancel-button">Cancel</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Initialize the analysis chart
+        const ctx = document.getElementById('analysisChart').getContext('2d');
+        const chartLabels = {{ chart_data.labels|tojson|safe }};
+        const chartScores = {{ chart_data.scores|tojson|safe }};
+        
+        new Chart(ctx, {
+            type: 'line',
+            data: {
+                labels: chartLabels,
+                datasets: [{
+                    label: 'Risk Score',
+                    data: chartScores,
+                    borderColor: '#4CAF50',
+                    tension: 0.4,
+                    pointBackgroundColor: '#4CAF50',
+                    fill: false
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: {
+                    legend: {
+                        display: false
+                    },
+                    tooltip: {
+                        callbacks: {
+                            label: function(context) {
+                                return `Risk Score: ${context.parsed.y.toFixed(1)}%`;
+                            }
+                        }
+                    }
+                },
+                scales: {
+                    y: {
+                        beginAtZero: true,
+                        max: 100,
+                        grid: {
+                            display: true,
+                            color: '#f0f0f0'
+                        },
+                        ticks: {
+                            callback: function(value) {
+                                return value + '%';
+                            }
+                        }
+                    },
+                    x: {
+                        grid: {
+                            display: false
+                        }
+                    }
+                }
+            }
+        });
+
+        // Logout functionality
+        function showLogoutConfirmation(event) {
+            event.preventDefault();
+            document.getElementById('logoutDialog').style.display = 'flex';
+        }
+
+        function hideLogoutConfirmation() {
+            document.getElementById('logoutDialog').style.display = 'none';
+        }
+
+        function logout() {
+            window.location.href = "{{ url_for('logout') }}";
+        }
+    </script>
+</body>
+</html>

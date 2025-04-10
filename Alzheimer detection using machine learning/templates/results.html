@@ -1,0 +1,343 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Test Results - Alzheimer's Risk Assessment</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --primary-color: #4CAF50;
+            --secondary-color: #2196F3;
+            --background-color: #f5f7fa;
+            --text-color: #2c3e50;
+            --border-color: #e1e8ed;
+            --card-background: #ffffff;
+            --success-color: #4CAF50;
+            --warning-color: #FFC107;
+            --danger-color: #F44336;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Inter', sans-serif;
+            line-height: 1.6;
+            color: var(--text-color);
+            background-color: var(--background-color);
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 2rem;
+        }
+
+        .hero-section {
+            background: linear-gradient(135deg, var(--primary-color), var(--secondary-color));
+            color: white;
+            padding: 3rem 0;
+            margin-bottom: 2rem;
+            border-radius: 12px;
+            text-align: center;
+        }
+
+        .hero-section h1 {
+            font-size: 2.5rem;
+            margin-bottom: 1rem;
+        }
+
+        .hero-section p {
+            font-size: 1.1rem;
+            opacity: 0.9;
+        }
+
+        .risk-score {
+            background: white;
+            padding: 2rem;
+            border-radius: 12px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+            margin-bottom: 2rem;
+            text-align: center;
+        }
+
+        .risk-score h2 {
+            color: var(--text-color);
+            margin-bottom: 1rem;
+        }
+
+        .risk-percentage {
+            font-size: 3.5rem;
+            font-weight: 700;
+            color: var(--primary-color);
+            margin: 1rem 0;
+        }
+
+        .risk-level {
+            font-size: 1.2rem;
+            font-weight: 500;
+            color: var(--text-color);
+        }
+
+        .task-results {
+            background: var(--card-background);
+            padding: 2rem;
+            border-radius: 12px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        }
+
+        .task-results h2 {
+            color: var(--text-color);
+            margin-bottom: 1.5rem;
+        }
+
+        .task-list {
+            display: grid;
+            gap: 1rem;
+        }
+
+        .task-item {
+            background: var(--background-color);
+            padding: 1.5rem;
+            border-radius: 8px;
+            border-left: 4px solid var(--primary-color);
+        }
+
+        .task-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 1rem;
+        }
+
+        .task-title {
+            font-weight: 600;
+            color: var(--text-color);
+        }
+
+        .task-category {
+            background: var(--primary-color);
+            color: white;
+            padding: 0.3rem 0.8rem;
+            border-radius: 20px;
+            font-size: 0.9rem;
+        }
+
+        .task-metrics {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 1rem;
+        }
+
+        .metric {
+            background: white;
+            padding: 1rem;
+            border-radius: 6px;
+            text-align: center;
+        }
+
+        .metric-value {
+            font-size: 1.2rem;
+            font-weight: 600;
+            color: var(--primary-color);
+        }
+
+        .metric-label {
+            font-size: 0.8rem;
+            color: #666;
+            margin-top: 0.3rem;
+        }
+
+        .navigation-buttons {
+            display: flex;
+            gap: 1rem;
+            margin-top: 2rem;
+            justify-content: center;
+        }
+
+        .btn {
+            padding: 0.8rem 1.5rem;
+            border-radius: 6px;
+            font-weight: 500;
+            text-decoration: none;
+            transition: all 0.3s ease;
+            cursor: pointer;
+            border: none;
+        }
+
+        .btn-primary {
+            background: var(--primary-color);
+            color: white;
+        }
+
+        .btn-secondary {
+            background: var(--secondary-color);
+            color: white;
+        }
+
+        .btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        }
+
+        @media (max-width: 768px) {
+            .container {
+                padding: 1rem;
+            }
+
+            .hero-section {
+                padding: 2rem 0;
+            }
+
+            .hero-section h1 {
+                font-size: 2rem;
+            }
+
+            .task-metrics {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+</head>
+
+<body>
+    <div class="container">
+        <div class="hero-section">
+            <h1>Test Results</h1>
+            <p>Your handwriting analysis and cognitive assessment results</p>
+        </div>
+
+        <div class="risk-score">
+            <h2>Overall Risk Assessment</h2>
+            <div class="risk-percentage">{{ "%.1f"|format(predictions.ensemble) }}%</div>
+            <div class="risk-level">
+                {% if predictions.ensemble < 30 %} Low Risk {% elif predictions.ensemble < 60 %} Moderate Risk {% else
+                    %} High Risk {% endif %} </div>
+            </div>
+
+            <div class="task-results">
+                <h2>Detailed Task Analysis</h2>
+                <div class="task-list">
+                    {% for metrics, task in results_with_tasks %}
+                    <div class="task-item">
+                        <div class="task-header">
+                            <div class="task-title">Task {{ task.task_number }}: {{ task.description }}</div>
+                            <div class="task-category">{{ task.category }}</div>
+                        </div>
+                        <div class="task-metrics">
+                            {% if metrics.air_time > 0 %}
+                            <div class="metric">
+                                <div class="metric-value">{{ "%.0f"|format(metrics.air_time) }}ms</div>
+                                <div class="metric-label">Air Time</div>
+                            </div>
+                            {% endif %}
+                            {% if metrics.paper_time > 0 %}
+                            <div class="metric">
+                                <div class="metric-value">{{ "%.0f"|format(metrics.paper_time) }}ms</div>
+                                <div class="metric-label">Paper Time</div>
+                            </div>
+                            {% endif %}
+                            {% if metrics.total_time > 0 %}
+                            <div class="metric">
+                                <div class="metric-value">{{ "%.0f"|format(metrics.total_time) }}ms</div>
+                                <div class="metric-label">Total Time</div>
+                            </div>
+                            {% endif %}
+                            {% if metrics.dispersion_index > 0 %}
+                            <div class="metric">
+                                <div class="metric-value">{{ "%.2f"|format(metrics.dispersion_index * 100) }}%</div>
+                                <div class="metric-label">Dispersion Index</div>
+                            </div>
+                            {% endif %}
+                            {% if metrics.mean_speed > 0 %}
+                            <div class="metric">
+                                <div class="metric-value">{{ "%.2f"|format(metrics.mean_speed) }}</div>
+                                <div class="metric-label">Mean Speed</div>
+                            </div>
+                            {% endif %}
+                            {% if metrics.max_x_extension > 0 %}
+                            <div class="metric">
+                                <div class="metric-value">{{ "%.2f"|format(metrics.max_x_extension) }}</div>
+                                <div class="metric-label">Max X Extension</div>
+                            </div>
+                            {% endif %}
+                            {% if metrics.max_y_extension > 0 %}
+                            <div class="metric">
+                                <div class="metric-value">{{ "%.2f"|format(metrics.max_y_extension) }}</div>
+                                <div class="metric-label">Max Y Extension</div>
+                            </div>
+                            {% endif %}
+                            {% if metrics.num_of_pendown > 0 %}
+                            <div class="metric">
+                                <div class="metric-value">{{ metrics.num_of_pendown }}</div>
+                                <div class="metric-label">Pen Down Count</div>
+                            </div>
+                            {% endif %}
+                            {% if metrics.mean_speed_in_air > 0 %}
+                            <div class="metric">
+                                <div class="metric-value">{{ "%.2f"|format(metrics.mean_speed_in_air) }}</div>
+                                <div class="metric-label">Mean Speed (Air)</div>
+                            </div>
+                            {% endif %}
+                            {% if metrics.mean_speed_on_paper > 0 %}
+                            <div class="metric">
+                                <div class="metric-value">{{ "%.2f"|format(metrics.mean_speed_on_paper) }}</div>
+                                <div class="metric-label">Mean Speed (Paper)</div>
+                            </div>
+                            {% endif %}
+                            {% if metrics.mean_acc_in_air > 0 %}
+                            <div class="metric">
+                                <div class="metric-value">{{ "%.2f"|format(metrics.mean_acc_in_air) }}</div>
+                                <div class="metric-label">Mean Acceleration (Air)</div>
+                            </div>
+                            {% endif %}
+                            {% if metrics.mean_acc_on_paper > 0 %}
+                            <div class="metric">
+                                <div class="metric-value">{{ "%.2f"|format(metrics.mean_acc_on_paper) }}</div>
+                                <div class="metric-label">Mean Acceleration (Paper)</div>
+                            </div>
+                            {% endif %}
+                            {% if metrics.mean_jerk_in_air > 0 %}
+                            <div class="metric">
+                                <div class="metric-value">{{ "%.2f"|format(metrics.mean_jerk_in_air) }}</div>
+                                <div class="metric-label">Mean Jerk (Air)</div>
+                            </div>
+                            {% endif %}
+                            {% if metrics.mean_jerk_on_paper > 0 %}
+                            <div class="metric">
+                                <div class="metric-value">{{ "%.2f"|format(metrics.mean_jerk_on_paper) }}</div>
+                                <div class="metric-label">Mean Jerk (Paper)</div>
+                            </div>
+                            {% endif %}
+                            {% if metrics.gmrt_in_air > 0 %}
+                            <div class="metric">
+                                <div class="metric-value">{{ "%.2f"|format(metrics.gmrt_in_air) }}</div>
+                                <div class="metric-label">GMRT (Air)</div>
+                            </div>
+                            {% endif %}
+                            {% if metrics.gmrt_on_paper > 0 %}
+                            <div class="metric">
+                                <div class="metric-value">{{ "%.2f"|format(metrics.gmrt_on_paper) }}</div>
+                                <div class="metric-label">GMRT (Paper)</div>
+                            </div>
+                            {% endif %}
+                        </div>
+                    </div>
+                    {% endfor %}
+                </div>
+            </div>
+
+            <div class="navigation-buttons">
+                <a href="{{ url_for('dashboard') }}" class="btn btn-secondary">Back to Dashboard</a>
+                <a href="{{ url_for('next_task', task_number=0) }}" class="btn btn-primary">Start New Test</a>
+            </div>
+        </div>
+    </div>
+</body>
+
+</html>

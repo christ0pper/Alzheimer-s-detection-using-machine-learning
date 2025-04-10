@@ -1,0 +1,137 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>About Us - മറവി</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/dashboard.css') }}">
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>About Us</h1>
+        </header>
+
+        <section class="about-main">
+            <div class="about-card">
+                <div class="about-header">
+                    <h2>Our Mission</h2>
+                </div>
+                <div class="about-content">
+                    <p>We are dedicated to providing innovative solutions for early detection and monitoring of cognitive health through advanced handwriting analysis.</p>
+                </div>
+            </div>
+
+            <div class="features-grid">
+                <div class="feature-card">
+                    <div class="feature-icon">🔬</div>
+                    <h3>Our Technology</h3>
+                    <p>State-of-the-art machine learning algorithms for cognitive health monitoring</p>
+                </div>
+                <div class="feature-card">
+                    <div class="feature-icon">🎯</div>
+                    <h3>Our Vision</h3>
+                    <p>Making cognitive health assessment accessible and effective for everyone</p>
+                </div>
+                <div class="feature-card">
+                    <div class="feature-icon">🛡️</div>
+                    <h3>Privacy & Security</h3>
+                    <p>Your data is encrypted and protected with the highest security standards</p>
+                </div>
+            </div>
+
+            <div class="about-card">
+                <div class="about-header">
+                    <h2>How It Works</h2>
+                </div>
+                <div class="about-content">
+                    <div class="process-steps">
+                        <div class="step">
+                            <div class="step-number">1</div>
+                            <h4>Handwriting Analysis</h4>
+                            <p>Our system analyzes handwriting patterns to detect early signs of cognitive changes</p>
+                        </div>
+                        <div class="step">
+                            <div class="step-number">2</div>
+                            <h4>Machine Learning</h4>
+                            <p>Advanced algorithms process the data to identify potential risk factors</p>
+                        </div>
+                        <div class="step">
+                            <div class="step-number">3</div>
+                            <h4>Risk Assessment</h4>
+                            <p>Comprehensive evaluation provides insights into cognitive health status</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="about-card">
+                <div class="about-header">
+                    <h2>Model Evaluation</h2>
+                </div>
+                <div class="about-content">
+                    <p>Explore the performance metrics and evaluation results of our machine learning models.</p>
+                    <div class="evaluation-button-container">
+                        <a href="{{ url_for('evaluation') }}" class="contact-button evaluation-button">View Model Evaluation</a>
+                    </div>
+                </div>
+            </div>
+
+            <div class="about-card">
+                <div class="about-header">
+                    <h2>Contact Us</h2>
+                </div>
+                <div class="about-content">
+                    <div class="contact-info">
+                        <p>Have questions or want to learn more?</p>
+                        <a href="https://www.youtube.com/watch?v=dQw4w9WgXcQ" class="contact-button" target="_blank">Email Us</a>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <nav class="nav-bar">
+            <a href="{{ url_for('dashboard') }}" class="nav-item">
+                <span class="nav-icon">🏠</span>
+                <span class="nav-label">Home</span>
+            </a>
+            <a href="{{ url_for('about') }}" class="nav-item active">
+                <span class="nav-icon">ℹ️</span>
+                <span class="nav-label">About</span>
+            </a>
+            <a href="#" class="nav-item" onclick="showLogoutConfirmation(event)">
+                <span class="nav-icon">👤</span>
+                <span class="nav-label">Profile</span>
+            </a>
+        </nav>
+
+        <!-- Logout Confirmation Dialog -->
+        <div id="logoutDialog" class="dialog-overlay">
+            <div class="dialog-content">
+                <h3>Logout Confirmation</h3>
+                <p>Do you want to log out?</p>
+                <div class="dialog-buttons">
+                    <button onclick="logout()" class="confirm-button">Yes, Logout</button>
+                    <button onclick="hideLogoutConfirmation()" class="cancel-button">Cancel</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        function showLogoutConfirmation(event) {
+            event.preventDefault();
+            document.getElementById('logoutDialog').style.display = 'flex';
+        }
+
+        function hideLogoutConfirmation() {
+            document.getElementById('logoutDialog').style.display = 'none';
+        }
+
+        function logout() {
+            window.location.href = "{{ url_for('logout') }}";
+        }
+    </script>
+</body>
+</html> 

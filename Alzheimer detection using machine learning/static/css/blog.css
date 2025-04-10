@@ -1,0 +1,387 @@
+.blog-container {
+  padding-top: 60px;
+}
+
+.back-button {
+  position: fixed;
+  top: 20px;
+  left: 20px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  background: var(--primary-color);
+  color: white;
+  text-decoration: none;
+  padding: 8px 16px;
+  border-radius: 8px;
+  font-size: 14px;
+  z-index: 100;
+}
+
+.back-icon {
+  font-size: 18px;
+}
+
+.blog-post {
+  background: var(--card-background);
+  border-radius: var(--border-radius);
+  padding: 24px;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+.blog-header {
+  margin-bottom: 24px;
+}
+
+.blog-header h1 {
+  font-size: 32px;
+  margin-bottom: 16px;
+  line-height: 1.3;
+}
+
+.post-meta {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  color: #666;
+  font-size: 14px;
+}
+
+.author-info {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.author-avatar {
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  object-fit: cover;
+}
+
+.blog-content {
+  font-size: 16px;
+  line-height: 1.8;
+  color: #333;
+}
+
+.blog-content p {
+  margin-bottom: 16px;
+}
+
+.blog-content h2 {
+  font-size: 24px;
+  margin: 32px 0 16px;
+}
+
+.blog-content h3 {
+  font-size: 20px;
+  margin: 24px 0 12px;
+}
+
+.blog-content ul,
+.blog-content ol {
+  margin: 16px 0;
+  padding-left: 24px;
+}
+
+.blog-content li {
+  margin-bottom: 8px;
+}
+
+.blog-footer {
+  margin-top: 32px;
+  padding-top: 24px;
+  border-top: 1px solid #eee;
+}
+
+.tags {
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+
+.tag {
+  background: #f0f0f0;
+  color: #666;
+  padding: 4px 12px;
+  border-radius: 16px;
+  font-size: 12px;
+}
+
+.blog-list-container {
+  padding: 24px;
+  max-width: 1200px;
+  margin: 0 auto;
+  padding-bottom: 80px;
+  background: #ffffff;
+}
+
+.blog-list-header {
+  text-align: center;
+  margin-bottom: 40px;
+  padding: 40px 0;
+  background: linear-gradient(
+    to right,
+    rgba(76, 175, 80, 0.1),
+    rgba(76, 175, 80, 0.05)
+  );
+  border-radius: 16px;
+}
+
+.blog-list-header h1 {
+  font-size: 32px;
+  color: #2e7d32;
+  margin-bottom: 12px;
+  font-weight: 600;
+}
+
+.blog-list-header .subtitle {
+  color: #4caf50;
+  font-size: 16px;
+  max-width: 600px;
+  margin: 0 auto;
+  line-height: 1.6;
+}
+
+.blog-list {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+  gap: 24px;
+  padding: 0 16px;
+}
+
+.blog-card {
+  background: #ffffff;
+  border-radius: 16px;
+  padding: 24px;
+  text-decoration: none;
+  color: inherit;
+  transition: all 0.3s ease;
+  border: 1px solid rgba(0, 128, 0, 0.1);
+  position: relative;
+  overflow: hidden;
+}
+
+.blog-card::before {
+  content: "";
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 4px;
+  background: linear-gradient(to right, #4caf50, #81c784);
+  opacity: 0;
+  transition: opacity 0.3s ease;
+}
+
+.blog-card:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 8px 24px rgba(0, 128, 0, 0.1);
+  border-color: rgba(0, 128, 0, 0.2);
+}
+
+.blog-card:hover::before {
+  opacity: 1;
+}
+
+.blog-card-content {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.blog-card h2 {
+  font-size: 20px;
+  margin: 0;
+  color: #333333;
+  line-height: 1.4;
+  font-weight: 600;
+  transition: color 0.3s ease;
+}
+
+.blog-card:hover h2 {
+  color: #2e7d32;
+}
+
+.blog-card-meta {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  font-size: 14px;
+  color: #666;
+  padding-bottom: 12px;
+  border-bottom: 1px solid rgba(0, 128, 0, 0.1);
+}
+
+.author {
+  color: #4caf50;
+  font-weight: 500;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.author::before {
+  content: "•";
+  color: #4caf50;
+}
+
+time {
+  color: #666666;
+}
+
+.tags {
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+  margin-top: 4px;
+}
+
+.tag {
+  background: rgba(76, 175, 80, 0.1);
+  color: #2e7d32;
+  padding: 6px 12px;
+  border-radius: 20px;
+  font-size: 12px;
+  transition: all 0.2s ease;
+  font-weight: 500;
+}
+
+.tag:hover {
+  background: rgba(76, 175, 80, 0.15);
+  transform: translateY(-1px);
+}
+
+/* Responsive adjustments */
+@media (max-width: 768px) {
+  .blog-list-container {
+    padding: 16px;
+  }
+
+  .blog-list-header {
+    padding: 32px 16px;
+    margin-bottom: 32px;
+  }
+
+  .blog-list-header h1 {
+    font-size: 28px;
+  }
+
+  .blog-list-header .subtitle {
+    font-size: 14px;
+  }
+
+  .blog-list {
+    grid-template-columns: 1fr;
+    padding: 0 8px;
+  }
+
+  .blog-card {
+    padding: 20px;
+  }
+}
+
+/* Animation for cards */
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.blog-card {
+  animation: fadeIn 0.5s ease forwards;
+}
+
+.blog-card:nth-child(2) {
+  animation-delay: 0.1s;
+}
+
+.blog-card:nth-child(3) {
+  animation-delay: 0.2s;
+}
+
+.blog-card:nth-child(4) {
+  animation-delay: 0.3s;
+}
+
+.blog-card:nth-child(5) {
+  animation-delay: 0.4s;
+}
+
+.blog-card:nth-child(6) {
+  animation-delay: 0.5s;
+}
+
+/* Dark mode support */
+@media (prefers-color-scheme: dark) {
+  .blog-list-container {
+    background: #ffffff;
+  }
+
+  .blog-list-header {
+    background: linear-gradient(
+      to right,
+      rgba(76, 175, 80, 0.15),
+      rgba(76, 175, 80, 0.05)
+    );
+  }
+
+  .blog-list-header h1 {
+    color: #2e7d32;
+  }
+
+  .blog-list-header .subtitle {
+    color: #4caf50;
+  }
+
+  .blog-card {
+    background: #ffffff;
+    border-color: rgba(76, 175, 80, 0.15);
+  }
+
+  .blog-card:hover {
+    border-color: rgba(76, 175, 80, 0.25);
+    box-shadow: 0 8px 24px rgba(76, 175, 80, 0.15);
+  }
+
+  .blog-card h2 {
+    color: #333333;
+  }
+
+  .blog-card:hover h2 {
+    color: #2e7d32;
+  }
+
+  .blog-card-meta {
+    border-bottom-color: rgba(76, 175, 80, 0.15);
+  }
+
+  .author {
+    color: #4caf50;
+  }
+
+  .author::before {
+    color: #4caf50;
+  }
+
+  time {
+    color: #666666;
+  }
+
+  .tag {
+    background: rgba(76, 175, 80, 0.1);
+    color: #2e7d32;
+  }
+
+  .tag:hover {
+    background: rgba(76, 175, 80, 0.15);
+    color: #2e7d32;
+  }
+}

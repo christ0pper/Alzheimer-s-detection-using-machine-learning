@@ -1,0 +1,233 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Memory Matrix</title>
+    <link href="https://fonts.googleapis.com/css2?family=Jacques+Francois&display=swap" rel="stylesheet">
+    <style>
+        body {
+            font-family: sans-serif;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            min-height: 100vh;
+            margin: 0;
+            background-color: #4a7a6f;
+            transition: background-color 0.3s ease;
+        }
+        h1 {
+            font-size: 40px;
+            margin-bottom: 10px;
+            color: #f1f6fc;
+            font-family: 'Jacques François';
+        }
+        .intro p {
+            font-size: 18px;
+            margin: 20px 0;
+            color: white;
+            font-family: 'Jacques François';
+        }
+        .score {
+            font-size: 20px;
+            margin-bottom: 20px;
+        }
+        .grid {
+            display: grid;
+            grid-gap: 10px;
+            display: none;
+        }
+        .tile {
+            width: 100px;
+            height: 100px;
+            background-color: #bbb;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: background-color 0.3s ease, transform 0.3s ease;
+        }
+        .flipped {
+            background-color: #4a7a6f;
+            transform: rotateY(180deg);
+        }
+        .correct {
+            background-color: white;
+        }
+        .incorrect {
+            background-color: rgb(194, 138, 138);
+        }
+        .game-over {
+            text-align: center;
+            margin-top: 20px;
+            display: none;
+        }
+        button {
+            padding: 10px 20px;
+            font-size: 16px;
+            cursor: pointer;
+            background-color: #90adcc;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            margin: 10px;
+        }
+        .intro {
+            text-align: center;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+        .back-button {
+            position: fixed;
+            top: 20px;
+            left: 20px;
+            background-color: #4CAF50;
+        }
+    </style>
+</head>
+<body>
+    <a href="{{ url_for('dashboard') }}" class="back-button button">Back to Dashboard</a>
+
+    <!-- Intro Screen -->
+    <div class="intro" id="introScreen">
+        <h1>Memory Matrix</h1>
+        <p>Memorize the squares.</p>
+        <button onclick="startGame()">Play</button>
+    </div>
+
+    <!-- Game Content -->
+    <div id="gameContent" style="display:none;">
+        <div class="score">Score: <span id="score">0</span></div>
+        <div class="grid" id="gameGrid"></div>
+        <div class="game-over" id="gameOver">
+            <h2>Game Over! Your Score: <span id="finalScore"></span></h2>
+            <button onclick="startGame()">Restart Game</button>
+        </div>
+    </div>
+
+    <script>
+        let level = 1;
+        let gridSize = 9; // Default to 3x3 grid
+        let sequence = [];
+        let userSequence = [];
+        let score = 0;
+        let gameOver = false;
+        let tileElements = [];
+        let roundsSinceGridIncrease = 0;
+
+        function startGame() {
+            document.body.style.backgroundColor = 'white';
+            document.getElementById('introScreen').style.display = 'none';
+            document.getElementById('gameContent').style.display = 'block';
+
+            gameOver = false;
+            sequence = [];
+            userSequence = [];
+            score = 0;
+            level = 1;
+            roundsSinceGridIncrease = 0;
+            document.getElementById('score').textContent = score;
+            document.getElementById('gameOver').style.display = 'none';
+
+            setGridSize(level);
+            generateGrid();
+            nextRound();
+        }
+
+        function setGridSize(level) {
+            if (level <= 3) gridSize = 9;  // 3x3
+            else if (level <= 6) gridSize = 16; // 4x4
+            else if (level <= 9) gridSize = 25; // 5x5
+            else if (level <= 12) gridSize = 36; // 6x6
+            else if (level <= 15) gridSize = 49; // 7x7
+            else gridSize = 64; // 8x8
+
+            const gridDimension = Math.sqrt(gridSize);
+            document.getElementById('gameGrid').style.gridTemplateColumns = `repeat(${gridDimension}, 100px)`;
+
+            generateGrid();
+        }
+
+        function generateGrid() {
+            const gameGrid = document.getElementById('gameGrid');
+            gameGrid.innerHTML = '';
+            tileElements = [];
+
+            for (let i = 0; i < gridSize; i++) {
+                const tile = document.createElement('div');
+                tile.classList.add('tile');
+                tile.addEventListener('click', () => userClick(i));
+                gameGrid.appendChild(tile);
+                tileElements.push(tile);
+            }
+
+            gameGrid.style.display = 'grid';
+        }
+
+        function nextRound() {
+            if (gameOver) return;
+
+            userSequence = [];
+            let tilesToShow = getRandomTiles();
+            flipTiles(tilesToShow);
+        }
+
+        function getRandomTiles() {
+            let maxTiles = Math.floor(gridSize / 2);
+            return Math.floor(Math.random() * maxTiles) + 1;
+        }
+
+        function flipTiles(tilesToShow) {
+            sequence = [];
+            while (sequence.length < tilesToShow) {
+                const randomTile = Math.floor(Math.random() * gridSize);
+                if (!sequence.includes(randomTile)) sequence.push(randomTile);
+            }
+
+            sequence.forEach(index => tileElements[index].classList.add('flipped'));
+
+            setTimeout(() => {
+                sequence.forEach(index => tileElements[index].classList.remove('flipped'));
+            }, 1500);
+        }
+
+        function userClick(index) {
+            if (gameOver || userSequence.length >= sequence.length) return;
+
+            const tile = tileElements[index];
+            if (sequence.includes(index)) {
+                tile.classList.add('correct');
+            } else {
+                tile.classList.add('incorrect');
+                gameOver = true;
+                resetGame();
+                return;
+            }
+
+            setTimeout(() => tile.classList.remove('correct', 'incorrect'), 300);
+            userSequence.push(index);
+
+            if (userSequence.length === sequence.length) {
+                score++;
+                document.getElementById('score').textContent = score;
+                setTimeout(() => {
+                    if (!gameOver) {
+                        roundsSinceGridIncrease++;
+                        if (roundsSinceGridIncrease >= 3) {
+                            level++;
+                            setGridSize(level);
+                            roundsSinceGridIncrease = 0;
+                        }
+                        nextRound();
+                    }
+                }, 1000);
+            }
+        }
+
+        function resetGame() {
+            document.getElementById('finalScore').textContent = score;
+            document.getElementById('gameOver').style.display = 'block';
+        }
+    </script>
+</body>
+</html> 

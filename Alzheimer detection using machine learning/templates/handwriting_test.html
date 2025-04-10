@@ -1,0 +1,473 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Handwriting Test</title>
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
+    <style>
+        .canvas-container {
+            width: 100%;
+            max-width: 1200px;
+            margin: 0 auto;
+            position: relative;
+        }
+
+        #drawingCanvas {
+            border: 2px solid #333;
+            margin: 20px auto;
+            display: block;
+            width: 100%;
+            height: auto;
+            touch-action: none;
+        }
+
+        @media (max-width: 768px) {
+            .canvas-container {
+                max-width: 100%;
+                padding: 10px;
+            }
+        }
+
+        .task-info {
+            background-color: #f8f9fa;
+            padding: 15px;
+            border-radius: 5px;
+            margin-bottom: 20px;
+        }
+        .category-badge {
+            font-size: 0.9em;
+            padding: 0.3em 0.6em;
+            margin-left: 10px;
+        }
+        .category-M { background-color: #ffd700; }
+        .category-G { background-color: #98fb98; }
+        .category-C { background-color: #87cefa; }
+        
+        /* Modal styles */
+        .memory-modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0,0,0,0.5);
+            z-index: 1000;
+        }
+        .memory-modal-content {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            background-color: white;
+            padding: 30px;
+            border-radius: 10px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+            text-align: center;
+        }
+        .memory-word {
+            font-size: 24px;
+            margin: 15px 0;
+            color: #333;
+            font-weight: bold;
+        }
+        .memorized-btn {
+            margin-top: 20px;
+            padding: 10px 30px;
+            font-size: 18px;
+            background-color: #28a745;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            transition: background-color 0.3s;
+        }
+        .memorized-btn:hover {
+            background-color: #218838;
+        }
+        #drawingCanvas.blurred {
+            filter: blur(5px);
+            pointer-events: none;
+        }
+        .task-image {
+            width: 200px;
+            height: auto;
+            object-fit: contain;
+            margin: 0;
+        }
+        .task-container {
+            display: flex;
+            align-items: flex-start;
+            gap: 20px;
+            margin-top: 20px;
+        }
+        .canvas-container {
+            flex: 1;
+        }
+        .button-container {
+            text-align: center;
+            margin-top: 20px;
+        }
+        
+        .button-container button {
+            margin: 0 10px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container mt-4">
+        <div class="task-info">
+            <h2>Task {{ task_number }}/{{ total_tasks }}
+                <span class="badge category-badge category-{{ task.category }}">{{ task.category }}</span>
+            </h2>
+            <p class="lead">{{ task.description }}</p>
+        </div>
+
+        <div class="task-container">
+            {% if task_number == 16 %}
+            <img src="{{ url_for('static', filename='images/chair.png') }}" alt="Wooden chair with armrests" class="task-image">
+            {% endif %}
+            <div class="canvas-container">
+                <canvas id="drawingCanvas"></canvas>
+                <div class="button-container">
+                    <button id="clearButton" class="btn btn-secondary">Clear</button>
+                    <button onclick="nextTask()" class="btn btn-primary">{% if task_number == total_tasks %}Finish Test{% else %}Next Task{% endif %}</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Memory Task Modal -->
+    <div id="memoryModal" class="memory-modal">
+        <div class="memory-modal-content">
+            <h3>Memorize these words:</h3>
+            <div class="memory-word"></div>
+            <div class="memory-word"></div>
+            <div class="memory-word"></div>
+            <button class="memorized-btn" onclick="closeMemoryModal()">I have memorized</button>
+        </div>
+    </div>
+
+    <script>
+        const canvas = document.getElementById('drawingCanvas');
+        const ctx = canvas.getContext('2d');
+        let isDrawing = false;
+        let lastX = 0;
+        let lastY = 0;
+        let scale = 1;
+        let baseWidth = 800;
+        let baseHeight = 450;
+
+        // Word list for memory task
+        const memoryWords = [
+            "phone", "dinner", "business", "computer", "garden",
+            "window", "picture", "school", "market", "office",
+            "family", "friend", "travel", "music", "book",
+            "coffee", "doctor", "teacher", "student", "hospital"
+        ];
+
+        // Function to get random words
+        function getRandomWords(count) {
+            const shuffled = [...memoryWords].sort(() => 0.5 - Math.random());
+            return shuffled.slice(0, count);
+        }
+
+        // Function to resize canvas
+        function resizeCanvas() {
+            const container = canvas.parentElement;
+            const containerWidth = container.clientWidth;
+            
+            // Calculate new dimensions maintaining aspect ratio
+            const aspectRatio = baseHeight / baseWidth;
+            const newWidth = Math.min(containerWidth, baseWidth);
+            const newHeight = newWidth * aspectRatio;
+
+            // Set display size
+            canvas.style.width = newWidth + 'px';
+            canvas.style.height = newHeight + 'px';
+
+            // Set actual canvas size (for higher resolution)
+            canvas.width = newWidth * window.devicePixelRatio;
+            canvas.height = newHeight * window.devicePixelRatio;
+
+            // Scale context to match device pixel ratio
+            ctx.scale(window.devicePixelRatio, window.devicePixelRatio);
+
+            // Calculate scale factor for coordinate conversion
+            scale = newWidth / baseWidth;
+
+            // Set line width based on scale
+            ctx.lineWidth = 2 * Math.min(scale, 1);
+
+            // Redraw reference points
+            drawReferencePoints();
+        }
+
+        // Initialize canvas size
+        resizeCanvas();
+
+        // Handle window resize
+        window.addEventListener('resize', resizeCanvas);
+
+        // Function to get coordinates with proper scaling
+        function getCoordinates(e) {
+            const rect = canvas.getBoundingClientRect();
+            const scaleX = canvas.width / (rect.width * window.devicePixelRatio);
+            const scaleY = canvas.height / (rect.height * window.devicePixelRatio);
+
+            let x, y;
+            if (e.type.includes('touch')) {
+                const touch = e.touches[0];
+                x = (touch.clientX - rect.left) * scaleX;
+                y = (touch.clientY - rect.top) * scaleY;
+            } else {
+                x = (e.clientX - rect.left) * scaleX;
+                y = (e.clientY - rect.top) * scaleY;
+            }
+
+            // Ensure coordinates are within canvas bounds
+            x = Math.max(0, Math.min(x, canvas.width));
+            y = Math.max(0, Math.min(y, canvas.height));
+
+            return [x, y];
+        }
+
+        // Function to draw reference points with scaling
+        function drawReferencePoints() {
+            const taskNumber = {{ task_number }};
+            const pointRadius = 5 * Math.min(scale, 1);
+            const PIXELS_PER_CM = 38 * scale; // Adjust for screen scaling
+            
+            if (taskNumber === 2) {
+                const centerY = canvas.height / (2 * window.devicePixelRatio);
+                const leftX = (canvas.width / window.devicePixelRatio) * 0.2;
+                const rightX = (canvas.width / window.devicePixelRatio) * 0.8;
+                
+                ctx.beginPath();
+                ctx.arc(leftX, centerY, pointRadius, 0, Math.PI * 2);
+                ctx.fillStyle = 'red';
+                ctx.fill();
+                
+                ctx.beginPath();
+                ctx.arc(rightX, centerY, pointRadius, 0, Math.PI * 2);
+                ctx.fillStyle = 'red';
+                ctx.fill();
+            } 
+            else if (taskNumber === 3) {
+                const centerX = canvas.width / (2 * window.devicePixelRatio);
+                const topY = (canvas.height / window.devicePixelRatio) * 0.2;    // 20% from top
+                const bottomY = (canvas.height / window.devicePixelRatio) * 0.8; // 20% from bottom
+                
+                ctx.beginPath();
+                ctx.arc(centerX, topY, pointRadius, 0, Math.PI * 2);
+                ctx.fillStyle = 'red';
+                ctx.fill();
+                
+                ctx.beginPath();
+                ctx.arc(centerX, bottomY, pointRadius, 0, Math.PI * 2);
+                ctx.fillStyle = 'red';
+                ctx.fill();
+            }
+            else if (taskNumber === 4) {
+                const centerX = canvas.width / (2 * window.devicePixelRatio);
+                const centerY = canvas.height / (2 * window.devicePixelRatio);
+                const radius = (6 * PIXELS_PER_CM) / 2;
+                
+                ctx.beginPath();
+                ctx.arc(centerX, centerY, radius, 0, Math.PI * 2);
+                ctx.strokeStyle = '#A0A0A0';
+                ctx.lineWidth = 1;
+                ctx.setLineDash([5, 5]);
+                ctx.stroke();
+                ctx.setLineDash([]);
+            }
+            else if (taskNumber === 5) {
+                const centerX = canvas.width / (2 * window.devicePixelRatio);
+                const centerY = canvas.height / (2 * window.devicePixelRatio);
+                const radius = (3 * PIXELS_PER_CM) / 2;
+                
+                ctx.beginPath();
+                ctx.arc(centerX, centerY, radius, 0, Math.PI * 2);
+                ctx.strokeStyle = '#A0A0A0';
+                ctx.lineWidth = 1;
+                ctx.setLineDash([5, 5]);
+                ctx.stroke();
+                ctx.setLineDash([]);
+            }
+            else if (taskNumber === 10 || taskNumber === 12) {
+                const lineY = canvas.height / (2 * window.devicePixelRatio); // Center line vertically
+                const startX = (canvas.width / window.devicePixelRatio) * 0.2;  // Start at 20% of canvas width
+                const endX = (canvas.width / window.devicePixelRatio) * 0.8;    // End at 80% of canvas width
+                
+                ctx.beginPath();
+                ctx.moveTo(startX, lineY);
+                ctx.lineTo(endX, lineY);
+                ctx.strokeStyle = '#000000'; // Black color
+                ctx.lineWidth = 2;
+                ctx.stroke();
+            }
+            else if (taskNumber === 17) {
+                // Define 8 points in a simple star pattern
+                const points = [
+                    {x: 0.5, y: 0.2, num: 1},  // Top point
+                    {x: 0.3, y: 0.3, num: 2},  // Top-left
+                    {x: 0.7, y: 0.3, num: 3},  // Top-right
+                    {x: 0.2, y: 0.5, num: 4},  // Left
+                    {x: 0.8, y: 0.5, num: 5},  // Right
+                    {x: 0.3, y: 0.7, num: 6},  // Bottom-left
+                    {x: 0.7, y: 0.7, num: 7},  // Bottom-right
+                    {x: 0.5, y: 0.8, num: 8}   // Bottom point
+                ];
+
+                // Draw points and numbers
+                points.forEach(point => {
+                    // Scale coordinates properly with device pixel ratio
+                    const x = (canvas.width / window.devicePixelRatio) * point.x;
+                    const y = (canvas.height / window.devicePixelRatio) * point.y;
+                    
+                    // Draw point with larger radius
+                    ctx.beginPath();
+                    ctx.arc(x, y, pointRadius * 2, 0, Math.PI * 2);
+                    ctx.fillStyle = 'red';
+                    ctx.fill();
+                    
+                    // Draw number with larger font
+                    ctx.font = '20px Arial';
+                    ctx.fillStyle = 'white';
+                    ctx.textAlign = 'center';
+                    ctx.textBaseline = 'middle';
+                    ctx.fillText(point.num.toString(), x, y);
+                });
+            }
+        }
+
+        // Drawing functions with proper coordinate scaling
+        function startDrawing(e) {
+            isDrawing = true;
+            [lastX, lastY] = getCoordinates(e);
+            
+            // Send coordinates scaled back to original canvas size with higher precision
+            const scaledX = lastX * (baseWidth / canvas.width);
+            const scaledY = lastY * (baseHeight / canvas.height);
+            
+            fetch('/start_drawing', {
+                method: 'POST',
+                headers: {'Content-Type': 'application/json'},
+                body: JSON.stringify({
+                    x: scaledX.toFixed(6),
+                    y: scaledY.toFixed(6)
+                })
+            });
+        }
+
+        function draw(e) {
+            if (!isDrawing) return;
+            
+            const [x, y] = getCoordinates(e);
+            
+            // Draw with anti-aliasing for smoother lines
+            ctx.lineCap = 'round';
+            ctx.lineJoin = 'round';
+            ctx.beginPath();
+            ctx.moveTo(lastX, lastY);
+            ctx.lineTo(x, y);
+            ctx.stroke();
+            
+            // Send coordinates with higher precision
+            const scaledX = x * (baseWidth / canvas.width);
+            const scaledY = y * (baseHeight / canvas.height);
+            
+            fetch('/draw', {
+                method: 'POST',
+                headers: {'Content-Type': 'application/json'},
+                body: JSON.stringify({
+                    x: scaledX.toFixed(6),
+                    y: scaledY.toFixed(6)
+                })
+            });
+            
+            [lastX, lastY] = [x, y];
+        }
+
+        // Clear canvas function
+        document.getElementById('clearButton').addEventListener('click', () => {
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+            drawReferencePoints(); // Redraw points after clearing
+        });
+
+        // Drawing functions
+        canvas.addEventListener('mousedown', startDrawing);
+        canvas.addEventListener('mousemove', draw);
+        canvas.addEventListener('mouseup', stopDrawing);
+        canvas.addEventListener('mouseout', stopDrawing);
+
+        // Touch events
+        canvas.addEventListener('touchstart', handleTouchStart);
+        canvas.addEventListener('touchmove', handleTouchMove);
+        canvas.addEventListener('touchend', handleTouchEnd);
+
+        function stopDrawing() {
+            if (isDrawing) {
+                fetch('/stop_drawing', {
+                    method: 'POST',
+                    headers: {'Content-Type': 'application/json'},
+                });
+            }
+            isDrawing = false;
+        }
+
+        function handleTouchStart(e) {
+            e.preventDefault();
+            startDrawing(e);
+        }
+
+        function handleTouchMove(e) {
+            e.preventDefault();
+            draw(e);
+        }
+
+        function handleTouchEnd(e) {
+            e.preventDefault();
+            stopDrawing();
+        }
+
+        function nextTask() {
+            const currentTaskNumber = {{ task_number }};
+            window.location.href = `/next-task/${currentTaskNumber}`;
+        }
+
+        // Show memory modal for task 13
+        function showMemoryModal() {
+            const taskNumber = {{ task_number }};
+            if (taskNumber === 13) {
+                const randomWords = getRandomWords(3);
+                const wordElements = document.querySelectorAll('.memory-word');
+                
+                // Update the words in the modal
+                wordElements.forEach((element, index) => {
+                    element.textContent = randomWords[index];
+                });
+                
+                document.getElementById('memoryModal').style.display = 'block';
+                document.getElementById('drawingCanvas').classList.add('blurred');
+                canvas.style.pointerEvents = 'none';
+            }
+        }
+
+        // Close memory modal
+        function closeMemoryModal() {
+            document.getElementById('memoryModal').style.display = 'none';
+            document.getElementById('drawingCanvas').classList.remove('blurred');
+            // Re-enable drawing
+            canvas.style.pointerEvents = 'auto';
+        }
+
+        // Draw reference points when page loads
+        drawReferencePoints();
+        
+        // Show memory modal if it's task 13
+        showMemoryModal();
+    </script>
+</body>
+</html>

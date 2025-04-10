@@ -1,0 +1,86 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="container">
+    <h2>Task Metrics - {{ task.description if task else 'Unknown Task' }}</h2>
+    
+    {% if metrics %}
+        <div class="table-responsive">
+            <table class="table table-striped">
+                <thead>
+                    <tr>
+                        <th>Timestamp</th>
+                        <th>Air Time (ms)</th>
+                        <th>Paper Time (ms)</th>
+                        <th>Total Time (ms)</th>
+                        <th>Dispersion Index</th>
+                        <th>Mean Speed (px/s)</th>
+                        <th>GMRT</th>
+                        <th>Max X Extension</th>
+                        <th>Max Y Extension</th>
+                        <th>Pen Down Count</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for metric in metrics %}
+                    <tr>
+                        <td>{{ metric.timestamp }}</td>
+                        <td>{{ "%.0f"|format(metric.air_time|float) }}</td>
+                        <td>{{ "%.0f"|format(metric.paper_time|float) }}</td>
+                        <td>{{ "%.0f"|format(metric.total_time|float) }}</td>
+                        <td>{{ "%.3f"|format(metric.dispersion_index|float) }}</td>
+                        <td>{{ "%.2f"|format(metric.mean_speed|float) }}</td>
+                        <td>{{ "%.2f"|format(metric.gmrt|float) }}</td>
+                        <td>{{ "%.2f"|format(metric.max_x_extension|float) }}</td>
+                        <td>{{ "%.2f"|format(metric.max_y_extension|float) }}</td>
+                        <td>{{ metric.num_of_pendown }}</td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+        
+        <div class="table-responsive mt-4">
+            <h3>Detailed Metrics</h3>
+            <table class="table table-striped">
+                <thead>
+                    <tr>
+                        <th>Timestamp</th>
+                        <th>Air Speed (px/s)</th>
+                        <th>Paper Speed (px/s)</th>
+                        <th>Air Acceleration</th>
+                        <th>Paper Acceleration</th>
+                        <th>Air Jerk</th>
+                        <th>Paper Jerk</th>
+                        <th>Air GMRT</th>
+                        <th>Paper GMRT</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for metric in metrics %}
+                    <tr>
+                        <td>{{ metric.timestamp }}</td>
+                        <td>{{ "%.2f"|format(metric.mean_speed_in_air|float) }}</td>
+                        <td>{{ "%.2f"|format(metric.mean_speed_on_paper|float) }}</td>
+                        <td>{{ "%.2f"|format(metric.mean_acc_in_air|float) }}</td>
+                        <td>{{ "%.2f"|format(metric.mean_acc_on_paper|float) }}</td>
+                        <td>{{ "%.2f"|format(metric.mean_jerk_in_air|float) }}</td>
+                        <td>{{ "%.2f"|format(metric.mean_jerk_on_paper|float) }}</td>
+                        <td>{{ "%.2f"|format(metric.gmrt_in_air|float) }}</td>
+                        <td>{{ "%.2f"|format(metric.gmrt_on_paper|float) }}</td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    {% else %}
+        <div class="alert alert-info">
+            No metrics found for this task.
+        </div>
+    {% endif %}
+    
+    <div class="mt-4">
+        <a href="{{ url_for('dashboard') }}" class="btn btn-primary">Back to Dashboard</a>
+    </div>
+</div>
+{% endblock %} 
